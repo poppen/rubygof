@@ -1,0 +1,138 @@
+<pre>
+<font color="#444444">#
+# The GoF Composite pattern
+# written by Matthieu Tanguay-Carel
+#
+# The Component module contains the common behavior between the leaf 
+# and composite. The component being a module, two classes are free to
+# share the same interface without being in the same object hierarchy.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><strong>module</strong> Component <font color="#444444">#file system entity
+    </font>attr_accessor <font color="4444FF">:</font>name
+    attr_accessor <font color="4444FF">:</font>owner
+
+    <strong>def<font color="ff0000"> initialize</font></strong> name
+        <font color="#2040a0">@name</font> <font color="4444FF">=</font> name
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> children</font></strong>
+        <font color="#2040a0">@children</font> ||<font color="4444FF">=</font> <font color="4444FF"><strong>[</strong></font><font color="4444FF"><strong>]</strong></font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> rename</font></strong> new_name
+        <font color="#2040a0">@name</font> <font color="4444FF">=</font> new_name
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> to_s</font></strong>
+        <font color="#2040a0">@name</font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> add_child</font></strong> <font color="4444FF">*</font>new_children
+        new_children.each <font color="4444FF"><strong>{</strong></font>|child| 
+            children.push child
+            <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;adding <font color="#2040a0">#{self}</font> as owner of <font color="#2040a0">#{child}</font>&quot;</font>
+            child.owner <font color="4444FF">=</font> <strong>self</strong>
+        <font color="4444FF"><strong>}</strong></font>
+    <strong>end</strong>
+ 
+    <strong>def<font color="ff0000"> remove_child</font></strong> child
+        children.delete child
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> MyFile</strong></font></strong>
+    include Component
+    attr_accessor <font color="4444FF">:</font>file_type
+
+    <strong>def<font color="ff0000"> initialize</font></strong> name<font color="4444FF">,</font> type
+        <font color="#2040a0">@file_type</font> <font color="4444FF">=</font> type
+        <strong>super</strong> name <font color="#444444">#we need to call super whatever happens
+                   #see ruby cookbook's recipe 9.8
+    </font><strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> MyDir</strong></font></strong>
+    include Component
+    attr_accessor <font color="4444FF">:</font>icon
+
+    <strong>def<font color="ff0000"> is_dir</font></strong>; <strong>true</strong>; <strong>end</strong>
+
+    <strong>def<font color="ff0000"> initialize</font></strong> name<font color="4444FF">,</font> icon
+        <font color="#2040a0">@icon</font> <font color="4444FF">=</font> icon
+        <strong>super</strong> name
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    <font color="#444444">#setup
+    </font>root  <font color="4444FF">=</font> MyDir.new <font color="#008000">'root'</font><font color="4444FF">,</font> <font color="4444FF">:</font>ginger
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;created directory root with icon in the form of a <font color="#2040a0">#{root.icon}</font>&quot;</font>
+    music <font color="4444FF">=</font> MyDir.new <font color="#008000">'music'</font><font color="4444FF">,</font> <font color="4444FF">:</font>clef
+    jewel <font color="4444FF">=</font> MyDir.new <font color="#008000">'jewel'</font><font color="4444FF">,</font> <font color="4444FF">:</font>guitar
+    notes <font color="4444FF">=</font> MyFile.new <font color="#008000">'notes'</font><font color="4444FF">,</font> <font color="4444FF">:</font>text
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;created file notes whose file type is <font color="#2040a0">#{notes.file_type}</font>&quot;</font>
+    movie <font color="4444FF">=</font> MyFile.new <font color="#008000">'ratatouille'</font><font color="4444FF">,</font> <font color="4444FF">:</font>mpeg
+    todos <font color="4444FF">=</font> MyFile.new <font color="#008000">'todos'</font><font color="4444FF">,</font> <font color="4444FF">:</font>text
+    song  <font color="4444FF">=</font> MyFile.new <font color="#008000">'iloveyou'</font><font color="4444FF">,</font> <font color="4444FF">:</font>mp<font color="#FF0000">3</font>
+
+    root.add_child notes<font color="4444FF">,</font> movie<font color="4444FF">,</font> todos
+    root.add_child music
+    music.add_child song
+    music.add_child jewel
+    
+    <font color="#444444">#use case 1
+    </font><font color="a52a2a"><strong>puts</strong></font> <font color="#008000">'prefixing all components as if they were the same type'</font>
+    <strong>def<font color="ff0000"> recursive_prefix</font></strong> prefix<font color="4444FF">,</font> component
+        component.rename<font color="4444FF"><strong>(</strong></font>prefix <font color="4444FF">+</font> component.name<font color="4444FF"><strong>)</strong></font>
+        component.children.each <font color="4444FF"><strong>{</strong></font>|child|
+            recursive_prefix prefix<font color="4444FF">,</font> child
+        <font color="4444FF"><strong>}</strong></font>
+    <strong>end</strong>
+    recursive_prefix <font color="#008000">'prefixed_'</font><font color="4444FF">,</font> root
+
+    <font color="#444444">#use case 2
+    </font><font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;extracting all directories&quot;</font>
+    <strong>def<font color="ff0000"> all_directories</font></strong> root
+        root.children.inject<font color="4444FF"><strong>(</strong></font><font color="4444FF"><strong>[</strong></font><font color="4444FF"><strong>]</strong></font><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>{</strong></font>|acc<font color="4444FF">,</font>component|
+            <strong>if</strong> component.respond_to? <font color="4444FF">:</font>is_dir
+                acc <font color="4444FF">&lt;&lt;</font> component 
+                acc.push <font color="4444FF">*</font>all_directories<font color="4444FF"><strong>(</strong></font>component<font color="4444FF"><strong>)</strong></font>
+            <strong>end</strong>
+            acc
+        <font color="4444FF"><strong>}</strong></font>
+    <strong>end</strong>
+    all_directories<font color="4444FF"><strong>(</strong></font>root<font color="4444FF"><strong>)</strong></font>.each <font color="4444FF"><strong>{</strong></font>|d| <font color="a52a2a"><strong>puts</strong></font> d<font color="4444FF"><strong>}</strong></font>
+
+    <font color="#444444">#use case 3
+    </font><font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;going up the hierarchy&quot;</font>
+    <strong>def<font color="ff0000"> get_master</font></strong> component
+        component <font color="4444FF">=</font> component.owner <strong>while</strong> <font color="4444FF">!</font>component.owner.<strong>nil</strong>?
+        component
+    <strong>end</strong>
+    <font color="a52a2a"><strong>puts</strong></font> get_master<font color="4444FF"><strong>(</strong></font>song<font color="4444FF"><strong>)</strong></font>
+    <font color="a52a2a"><strong>puts</strong></font> get_master<font color="4444FF"><strong>(</strong></font>jewel<font color="4444FF"><strong>)</strong></font>
+<strong>end</strong>
+
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+created directory root with icon in the form of a ginger
+created file notes whose file type is text
+adding root as owner of notes
+adding root as owner of ratatouille
+adding root as owner of todos
+adding root as owner of music
+adding music as owner of iloveyou
+adding music as owner of jewel
+prefixing all components as if they were the same type
+extracting all directories
+prefixed_music
+prefixed_jewel
+going up the hierarchy
+prefixed_root
+prefixed_root
+</pre>

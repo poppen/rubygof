@@ -1,0 +1,51 @@
+<pre>
+<font color="#444444">#
+# The GoF Template pattern
+# written by Matthieu Tanguay-Carel
+#
+# The module Template implements the boilerplate of the algorithm.
+# Some hooks are optional and some mandatory.
+#
+# Of course you could also just yield to a block if your template is simple.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><strong>module</strong> Template
+    <font color="#444444">#mandatory_methods = [&quot;tagname&quot;, &quot;content&quot;]
+    #optional_methods = [&quot;font_size&quot;, &quot;background_color&quot;]
+    </font><strong>def<font color="ff0000"> generate</font></strong>
+        str <font color="4444FF">=</font> <font color="#008000">&quot;&lt;<font color="#2040a0">#{tagname}</font>&quot;</font> 
+        styles <font color="4444FF">=</font> <font color="#008000">''</font>
+        styles <font color="4444FF">+=</font> <font color="#008000">&quot;font-size:<font color="#2040a0">#{font_size}</font>;&quot;</font> <strong>if</strong> respond_to? <font color="4444FF">:</font>font_size
+        styles <font color="4444FF">+=</font> <font color="#008000">&quot;background-color:<font color="#2040a0">#{background_color}</font>;&quot;</font> \
+            <strong>if</strong> respond_to? <font color="4444FF">:</font>background_color
+        str <font color="4444FF">+=</font> <font color="#008000">&quot; style='<font color="#2040a0">#{styles}</font>'&quot;</font> <strong>if</strong> <font color="4444FF">!</font>styles.empty?
+        str <font color="4444FF">+=</font> <font color="#008000">&quot;&gt;<font color="#2040a0">#{content}</font>&lt;/<font color="#2040a0">#{tagname}</font>&gt;&quot;</font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> Body</strong></font></strong>
+    <strong>def<font color="ff0000"> tagname</font></strong>
+        <font color="#008000">&quot;body&quot;</font>
+    <strong>end</strong>
+    <strong>def<font color="ff0000"> content</font></strong>
+        <font color="#008000">&quot;hello&quot;</font>
+    <strong>end</strong>
+    <strong>def<font color="ff0000"> font_size</font></strong>
+        <font color="#008000">&quot;18pt&quot;</font>
+    <strong>end</strong>
+    include Template
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    b <font color="4444FF">=</font> Body.new
+    <font color="a52a2a"><strong>puts</strong></font> b.generate
+<strong>end</strong>
+
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+&lt;body style='font-size:18pt;'&gt;hello&lt;/body&gt;
+</pre>

@@ -1,0 +1,137 @@
+<pre>
+<font color="#444444">#
+# The GoF Command pattern
+# written by Matthieu Tanguay-Carel
+#
+# The Command instance is initialized with its receiver.
+# Commands can be grouped by registering children to a macro command.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><strong>class<font color="#2040a0"><strong> Command</strong></font></strong>
+    attr_accessor <font color="4444FF">:</font>receiver
+    <strong>def<font color="ff0000"> initialize</font></strong> receiver
+        <font color="#2040a0">@receiver</font> <font color="4444FF">=</font> receiver
+        <font color="#2040a0">@commands</font> <font color="4444FF">=</font> <font color="4444FF"><strong>[</strong></font><font color="4444FF"><strong>]</strong></font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> register_command</font></strong> <font color="4444FF">*</font>command
+        <font color="#2040a0">@commands.push</font> <font color="4444FF">*</font>command
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> execute</font></strong>
+        <font color="#2040a0">@commands.each</font> <font color="4444FF"><strong>{</strong></font>|cmd| cmd.save <font color="4444FF"><strong>}</strong></font>
+        <font color="#2040a0">@commands.each</font> <font color="4444FF"><strong>{</strong></font>|cmd| cmd._execute <font color="4444FF"><strong>}</strong></font>
+        save
+        _execute
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> undo</font></strong>
+        <font color="#2040a0">@commands.each</font> <font color="4444FF"><strong>{</strong></font>|cmd| cmd.undo <font color="4444FF"><strong>}</strong></font>
+    <strong>end</strong>
+
+    <font color="#444444">#implement the following methods in the subclasses
+    </font>protected
+    <strong>def<font color="ff0000"> save</font></strong>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> _execute</font></strong>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> TextCommand</strong></font> <font color="0000ff"><strong><font color="4444FF">&lt;</font> Command</strong></font></strong>
+    <strong>def<font color="ff0000"> save</font></strong>
+        <font color="#2040a0">@last_state</font> ||<font color="4444FF">=</font> Marshal.<font color="a52a2a"><strong>load</strong></font><font color="4444FF"><strong>(</strong></font>Marshal.dump<font color="4444FF"><strong>(</strong></font><font color="#2040a0">@receiver.text</font><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font> 
+        <strong>super</strong>
+    <strong>end</strong>
+    <strong>def<font color="ff0000"> undo</font></strong>
+        <font color="#2040a0">@receiver.text</font> <font color="4444FF">=</font> <font color="#2040a0">@last_state</font>
+        <font color="#2040a0">@last_state</font> <font color="4444FF">=</font> <strong>nil</strong>
+        <strong>super</strong>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> UppercaseCommand</strong></font> <font color="0000ff"><strong><font color="4444FF">&lt;</font> TextCommand</strong></font></strong>
+    <strong>def<font color="ff0000"> _execute</font></strong> 
+        <font color="#2040a0">@receiver.text.upcase</font><font color="4444FF">!</font>
+        <strong>super</strong>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> IndentCommand</strong></font> <font color="0000ff"><strong><font color="4444FF">&lt;</font> TextCommand</strong></font></strong>
+    <strong>def<font color="ff0000"> _execute</font></strong>
+        <font color="#2040a0">@receiver.text</font> <font color="4444FF">=</font> <font color="#008000">&quot;<font color="#77dd77">\t</font>&quot;</font> <font color="4444FF">+</font> <font color="#2040a0">@receiver.text</font>
+        <strong>super</strong>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>module</strong> Invoker
+    attr_accessor <font color="4444FF">:</font>command
+    <strong>def<font color="ff0000"> click</font></strong>
+        <font color="#2040a0">@command.execute</font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> undo</font></strong>
+        <font color="#2040a0">@command.undo</font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> Document</strong></font></strong>
+    attr_accessor <font color="4444FF">:</font>text
+    <strong>def<font color="ff0000"> initialize</font></strong> text
+        <font color="#2040a0">@text</font> <font color="4444FF">=</font> text
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    text <font color="4444FF">=</font> <font color="#008000">&quot;This is a test&quot;</font>
+    doc <font color="4444FF">=</font> Document.new text
+    upcase_cmd <font color="4444FF">=</font> UppercaseCommand.new doc
+    button <font color="4444FF">=</font> Object.new.extend<font color="4444FF"><strong>(</strong></font>Invoker<font color="4444FF"><strong>)</strong></font>
+    button.command <font color="4444FF">=</font> upcase_cmd
+
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;before anything&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> doc.text
+    button.click
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;after click&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> doc.text
+    button.undo
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;after undo&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> doc.text
+
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;<font color="#77dd77">\n</font>Now a macro command&quot;</font>
+    allCmds <font color="4444FF">=</font> Command.new doc
+    indent_cmd <font color="4444FF">=</font> IndentCommand.new doc
+    allCmds.register_command upcase_cmd<font color="4444FF">,</font> indent_cmd
+
+    big_button <font color="4444FF">=</font> Object.new.extend<font color="4444FF"><strong>(</strong></font>Invoker<font color="4444FF"><strong>)</strong></font>
+    big_button.command <font color="4444FF">=</font> allCmds
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;before anything&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> doc.text
+    big_button.click
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;after click&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> doc.text
+    big_button.undo
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;after undo&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> doc.text
+<strong>end</strong>
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+before anything
+This is a test
+after click
+THIS IS A TEST
+after undo
+This is a test
+
+Now a macro command
+before anything
+This is a test
+after click
+	THIS IS A TEST
+after undo
+This is a test
+</pre>

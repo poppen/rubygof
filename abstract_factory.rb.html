@@ -1,0 +1,85 @@
+<pre>
+<font color="#444444">#
+# The GoF Abstract Factory pattern
+# written by Matthieu Tanguay-Carel
+#
+# Factories behave in effect like singletons.
+# Extra functionality can be tested for with &quot;Object#respond_to? :extra&quot; 
+# if needed (See GTKFactory).
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><strong>module</strong> MyAbstractFactory
+    <strong>def<font color="ff0000"> create_button</font></strong>
+        <font color="a52a2a"><strong>raise</strong></font> NotImplementedError<font color="4444FF">,</font> <font color="#008000">&quot;You should implement this method&quot;</font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> Win95Factory</strong></font></strong>
+    include MyAbstractFactory
+    <strong>def<font color="ff0000"> create_button</font></strong>
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;I'm Win95&quot;</font>
+        <font color="#008000">&quot;win95button&quot;</font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> MotifFactory</strong></font></strong>
+    include MyAbstractFactory
+    <strong>def<font color="ff0000"> create_button</font></strong>
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;I'm Motif&quot;</font>
+        <font color="#008000">&quot;motifbutton&quot;</font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> GTKFactory</strong></font></strong>
+    include MyAbstractFactory
+    <strong>def<font color="ff0000"> create_button</font></strong>
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;I'm GTK&quot;</font>
+        <font color="#008000">&quot;gtkbutton&quot;</font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> extra</font></strong>
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;I'm enhanced&quot;</font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> LookAndFeelManager</strong></font></strong>
+
+    <font color="#2040a0">@@</font>types<font color="#FF0000">2</font>classes <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> 
+        <font color="4444FF">:</font>motif <font color="4444FF">=&gt;</font> <font color="4444FF"><strong>[</strong></font>MotifFactory<font color="4444FF">,</font><strong>nil</strong><font color="4444FF"><strong>]</strong></font><font color="4444FF">,</font>
+        <font color="4444FF">:</font>gtk   <font color="4444FF">=&gt;</font> <font color="4444FF"><strong>[</strong></font>GTKFactory<font color="4444FF">,</font><strong>nil</strong><font color="4444FF"><strong>]</strong></font><font color="4444FF">,</font>
+        <font color="4444FF">:</font>win<font color="#FF0000">95</font> <font color="4444FF">=&gt;</font> <font color="4444FF"><strong>[</strong></font>Win<font color="#FF0000">95</font>Factory<font color="4444FF">,</font><strong>nil</strong><font color="4444FF"><strong>]</strong></font>
+    <font color="4444FF"><strong>}</strong></font>
+
+    <strong>def<font color="ff0000"> self</font>.create</strong> type
+        <strong>if</strong> <font color="4444FF">!</font><font color="#2040a0">@@</font>types<font color="#FF0000">2</font>classes.include? type
+            <font color="a52a2a"><strong>raise</strong></font> NotImplementedError<font color="4444FF">,</font> <font color="#008000">&quot;I know nothing about type: <font color="#2040a0">#{type}</font>&quot;</font>
+        <strong>end</strong>
+        factory_and_instance <font color="4444FF">=</font> <font color="#2040a0">@@</font>types<font color="#FF0000">2</font>classes<font color="4444FF"><strong>[</strong></font>type<font color="4444FF"><strong>]</strong></font>
+
+        <strong>if</strong> factory_and_instance<font color="4444FF"><strong>[</strong></font><font color="#FF0000">1</font><font color="4444FF"><strong>]</strong></font>.<strong>nil</strong>?
+            <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">'instantiating new factory'</font>
+            factory_and_instance<font color="4444FF"><strong>[</strong></font><font color="#FF0000">1</font><font color="4444FF"><strong>]</strong></font> <font color="4444FF">=</font> factory_and_instance<font color="4444FF"><strong>[</strong></font><font color="#FF0000">0</font><font color="4444FF"><strong>]</strong></font>.new <font color="#444444">#mutex this
+        </font><strong>else</strong>
+            <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">'returning already instantiated factory'</font>
+            factory_and_instance<font color="4444FF"><strong>[</strong></font><font color="#FF0000">1</font><font color="4444FF"><strong>]</strong></font>
+        <strong>end</strong>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    factory <font color="4444FF">=</font> LookAndFeelManager.create <font color="4444FF">:</font>gtk
+    <font color="a52a2a"><strong>puts</strong></font> factory.create_button
+    factory.extra <strong>if</strong> factory.respond_to? <font color="4444FF">:</font>extra
+<strong>end</strong>
+
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+instantiating new factory
+I'm GTK
+gtkbutton
+I'm enhanced
+</pre>

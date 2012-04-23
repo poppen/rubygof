@@ -1,0 +1,109 @@
+<pre>
+<font color="#444444">#
+# The GoF Proxy pattern
+# written by Matthieu Tanguay-Carel
+#
+# The Image class is the proxy. It should override the operations
+# the clients need before costly processing has to take place.
+# The attr_proxy method allows the Proxy module to automatically
+# remove the overridden methods once the real subject is created.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><strong>module</strong> Proxy
+    <strong>def<font color="ff0000"> self</font>.included</strong> cls
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;creating the attr_proxy method&quot;</font>
+        cls.instance_eval <font color="4444FF"><strong>{</strong></font>
+            <strong>def<font color="ff0000"> proxy_methods</font></strong>
+                <font color="#2040a0">@proxy_methods</font> ||<font color="4444FF">=</font> <font color="4444FF"><strong>[</strong></font><font color="4444FF"><strong>]</strong></font>
+            <strong>end</strong>
+            <strong>def<font color="ff0000"> attr_proxy</font></strong> name
+                proxy_methods <font color="4444FF">&lt;&lt;</font> name
+            <strong>end</strong>
+        <font color="4444FF"><strong>}</strong></font>
+    <strong>end</strong>
+
+    <font color="#444444">#call this to set the proxy object
+    </font><strong>def<font color="ff0000"> proxy</font></strong> real_cls<font color="4444FF">,</font> constructor_args
+        <font color="#2040a0">@real_cls</font> <font color="4444FF">=</font> real_cls
+        <font color="#2040a0">@constructor_args</font> <font color="4444FF">=</font> constructor_args
+    <strong>end</strong>
+    
+    <strong>def<font color="ff0000"> real_subject</font></strong>
+        <font color="#2040a0">@real_subject</font> <strong>or</strong> <strong>nil</strong>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> method_missing</font></strong> method<font color="4444FF">,</font> <font color="4444FF">*</font>args
+        <strong>if</strong> real_subject.<strong>nil</strong>?
+            <font color="#2040a0">@real_subject</font> <font color="4444FF">=</font> <font color="#2040a0">@real_cls.new</font> <font color="4444FF">*</font><font color="#2040a0">@constructor_args</font>
+            <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;instantiating real subject&quot;</font>
+            <strong>self</strong>.<strong>class</strong>.proxy_methods.each <font color="4444FF"><strong>{</strong></font>|proxy_meth| 
+                <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;removing <font color="#2040a0">#{proxy_meth}</font> from proxy&quot;</font>
+                <strong>self</strong>.<strong>class</strong>.instance_eval <font color="4444FF"><strong>{</strong></font>
+                    remove_method proxy_meth 
+                <font color="4444FF"><strong>}</strong></font>
+            <font color="4444FF"><strong>}</strong></font>
+        <strong>end</strong>
+        <strong>if</strong> real_subject.respond_to? method
+            real_subject.send method<font color="4444FF">,</font> <font color="4444FF">*</font>args
+        <strong>else</strong>
+            <font color="a52a2a"><strong>raise</strong></font> NotImplementedError<font color="4444FF">,</font> <font color="#008000">&quot;This method (<font color="#2040a0">#{method}</font>) is &quot;</font> <font color="4444FF">+</font> \
+                <font color="#008000">&quot;not available on this interface&quot;</font>
+        <strong>end</strong>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> Image</strong></font></strong>
+    include Proxy
+    attr_accessor <font color="4444FF">:</font>mtime
+    attr_proxy <font color="4444FF">:</font>mtime
+    attr_proxy <font color="4444FF">:</font>mtime<font color="4444FF">=</font>
+    attr_proxy <font color="4444FF">:</font>to_s
+
+    <strong>def<font color="ff0000"> to_s</font></strong>
+        <font color="#008000">&quot;proxy_image&quot;</font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    <font color="#444444">#create the proxy
+    </font>img <font color="4444FF">=</font> Image.new
+    img.proxy<font color="4444FF"><strong>(</strong></font>File<font color="4444FF">,</font> <font color="4444FF"><strong>[</strong></font><font color="#008000">&quot;img.jpg&quot;</font><font color="4444FF">,</font> <font color="#008000">'w'</font><font color="4444FF"><strong>]</strong></font><font color="4444FF"><strong>)</strong></font>
+    img.mtime <font color="4444FF">=</font> <font color="#008000">&quot;a few hours ago&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;proxy methods:&quot;</font>
+    img.<strong>class</strong>.proxy_methods.each <font color="4444FF"><strong>{</strong></font>|m| <font color="a52a2a"><strong>puts</strong></font> m<font color="4444FF"><strong>}</strong></font>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">''</font>
+
+    <font color="#444444">#use the proxy
+    </font><font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;image's last modified time is <font color="#2040a0">#{img.mtime}</font>&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;image's string representation: <font color="#2040a0">#{img}</font>&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">''</font>
+
+    <font color="#444444">#force creation of the real subject
+    </font>img.write <font color="#008000">&quot;im stuck in an image !<font color="#77dd77">\n</font>&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;image's last modified time is <font color="#2040a0">#{img.mtime}</font>&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;image's string representation: <font color="#2040a0">#{img}</font>&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;file written to!&quot;</font>
+<strong>end</strong>
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+creating the attr_proxy method
+proxy methods:
+mtime
+mtime=
+to_s
+
+image's last modified time is a few hours ago
+image's string representation: proxy_image
+
+instantiating real subject
+removing mtime from proxy
+removing mtime= from proxy
+removing to_s from proxy
+image's last modified time is Sun Oct 14 17:25:17 +1000 2007
+image's string representation: #&lt;Image:0xb7bfcbbc&gt;
+file written to!
+</pre>

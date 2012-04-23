@@ -1,0 +1,95 @@
+<pre>
+<font color="#444444">#
+# The GoF Strategy pattern
+# written by Matthieu Tanguay-Carel
+#
+# Sorter is the Context object. It allows to choose between sorting
+# implementations.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><strong>class<font color="#2040a0"><strong> QuickSort</strong></font></strong>
+    <strong>def<font color="ff0000"> sort</font></strong> arr
+        <strong>return</strong> <font color="4444FF"><strong>[</strong></font><font color="4444FF"><strong>]</strong></font> <strong>if</strong> arr.length <font color="4444FF">==</font> <font color="#FF0000">0</font>
+        x<font color="4444FF">,</font> <font color="4444FF">*</font>xs <font color="4444FF">=</font> <font color="4444FF">*</font>arr
+        smaller<font color="4444FF">,</font> bigger <font color="4444FF">=</font> xs.partition<font color="4444FF"><strong>{</strong></font> |other| other <font color="4444FF">&lt;</font> x <font color="4444FF"><strong>}</strong></font>
+        sort<font color="4444FF"><strong>(</strong></font>smaller<font color="4444FF"><strong>)</strong></font> <font color="4444FF">+</font> <font color="4444FF"><strong>[</strong></font>x<font color="4444FF"><strong>]</strong></font> <font color="4444FF">+</font> sort<font color="4444FF"><strong>(</strong></font>bigger<font color="4444FF"><strong>)</strong></font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> MergeSort</strong></font></strong>
+    <strong>def<font color="ff0000"> sort</font></strong> array
+        <strong>if</strong> array.length <font color="4444FF">&lt;=</font> <font color="#FF0000">1</font>
+            <strong>return</strong> array
+        <strong>end</strong>
+        middle <font color="4444FF">=</font> array.length <font color="4444FF">/</font> <font color="#FF0000">2</font>
+        left <font color="4444FF">=</font> array<font color="4444FF"><strong>[</strong></font><font color="#FF0000">0...</font>middle<font color="4444FF"><strong>]</strong></font>
+        right <font color="4444FF">=</font> array<font color="4444FF"><strong>[</strong></font>middle<font color="4444FF">...</font>array.length<font color="4444FF"><strong>]</strong></font>
+        left <font color="4444FF">=</font> sort left
+        right <font color="4444FF">=</font> sort right
+        <strong>return</strong> merge<font color="4444FF"><strong>(</strong></font>left<font color="4444FF">,</font>right<font color="4444FF"><strong>)</strong></font>
+    <strong>end</strong>
+ 
+    <strong>def<font color="ff0000"> merge</font></strong> left<font color="4444FF">,</font>right
+        result <font color="4444FF">=</font> <font color="4444FF"><strong>[</strong></font><font color="4444FF"><strong>]</strong></font>
+        <strong>while</strong> left.length <font color="4444FF">&gt;</font> <font color="#FF0000">0</font> <strong>and</strong> right.length <font color="4444FF">&gt;</font> <font color="#FF0000">0</font>
+            left.first <font color="4444FF">&lt;=</font> right.first ? result <font color="4444FF">&lt;&lt;</font> left.shift <font color="4444FF">:</font> result <font color="4444FF">&lt;&lt;</font> right.shift
+        <strong>end</strong>
+        result.push <font color="4444FF">*</font>left <strong>if</strong> left.length <font color="4444FF">&gt;</font> <font color="#FF0000">0</font>
+        result.push <font color="4444FF">*</font>right <strong>if</strong> right.length <font color="4444FF">&gt;</font> <font color="#FF0000">0</font>
+        <strong>return</strong> result
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> Sorter</strong></font></strong>
+    <font color="#2040a0">@@</font>default_strategy <font color="4444FF">=</font> QuickSort.new
+    <strong>def<font color="ff0000"> self</font>.sort</strong> arr<font color="4444FF">,</font> strategy<font color="4444FF">=</font><strong>nil</strong>
+        strategy ||<font color="4444FF">=</font> <font color="#2040a0">@@</font>default_strategy
+        strategy.sort<font color="4444FF"><strong>(</strong></font>arr<font color="4444FF"><strong>)</strong></font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>def<font color="ff0000"> print_elems</font></strong> arr
+    arr.each <font color="4444FF"><strong>{</strong></font>|elem| <font color="#2040a0"><strong>$stdout</strong></font>.write <font color="#008000">&quot;<font color="#2040a0">#{elem}</font> &quot;</font><font color="4444FF"><strong>}</strong></font>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">''</font>
+<strong>end</strong>
+
+<strong>def<font color="ff0000"> get_random_array</font></strong> size
+    arr <font color="4444FF">=</font> <font color="4444FF"><strong>[</strong></font><font color="4444FF"><strong>]</strong></font>
+    size.times <strong>do</strong> arr <font color="4444FF">&lt;&lt;</font> <font color="a52a2a"><strong>rand</strong></font><font color="4444FF"><strong>(</strong></font><font color="#FF0000">100</font><font color="4444FF"><strong>)</strong></font> <strong>end</strong>
+    arr
+<strong>end</strong>
+
+<font color="a52a2a"><strong>require</strong></font> <font color="#008000">'benchmark'</font>
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    arr_length <font color="4444FF">=</font> <font color="#FF0000">1000</font>
+    arr<font color="#FF0000">1</font> <font color="4444FF">=</font> get_random_array arr_length
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;Sorting first array&quot;</font>
+    <font color="#444444">#print_elems arr1
+    </font><font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;Time taken for QuickSort: <font color="#2040a0">#{Benchmark.measure {
+        arr1 = Sorter.sort(arr1, QuickSort.new)
+        print_elems arr1[0...40]
+    }</font>}&quot;</font>
+
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;<font color="#77dd77">\n</font>Sorting second array&quot;</font>
+    arr<font color="#FF0000">2</font> <font color="4444FF">=</font> get_random_array arr_length
+    <font color="#444444">#print_elems arr2
+    </font><font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;Time taken for MergeSort: <font color="#2040a0">#{Benchmark.measure {
+        arr2 = Sorter.sort(arr2, MergeSort.new)
+        print_elems arr2[0...40]
+    }</font>}&quot;</font>
+<strong>end</strong>
+
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+Sorting first array
+0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3 3 3 4 
+Time taken for QuickSort:   0.030000   0.000000   0.030000 (  0.030721)
+
+Sorting second array
+0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 
+Time taken for MergeSort:   0.030000   0.000000   0.030000 (  0.029816)
+</pre>

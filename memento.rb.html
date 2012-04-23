@@ -1,0 +1,76 @@
+<pre>
+<font color="#444444">#
+# The GoF Memento pattern
+# written by Matthieu Tanguay-Carel
+#
+# The Originator can save and load itself.
+# The Caretaker (the main function in this case) never has to touch
+# the memento objects.
+#
+# This implementation is a bit naive: 
+#   - saves should be kept in files
+#   - Marshal will not always work (singleton methods, bindings, etc..)
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><strong>module</strong> Originator
+    <strong>def<font color="ff0000"> saves</font></strong>
+        <font color="#2040a0">@saves</font> ||<font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF"><strong>}</strong></font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> save</font></strong> key
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;saving key <font color="#2040a0">#{key}</font>&quot;</font>
+        saves<font color="4444FF"><strong>[</strong></font>key<font color="4444FF"><strong>]</strong></font> <font color="4444FF">=</font> Marshal.dump <strong>self</strong>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> restore</font></strong> key
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;restoring key <font color="#2040a0">#{key}</font>&quot;</font>
+        include_state Marshal.<font color="a52a2a"><strong>load</strong></font><font color="4444FF"><strong>(</strong></font>saves<font color="4444FF"><strong>[</strong></font>key<font color="4444FF"><strong>]</strong></font><font color="4444FF"><strong>)</strong></font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> include_state</font></strong> other
+        other.instance_variables.each <font color="4444FF"><strong>{</strong></font>|var|
+            instance_variable_set<font color="4444FF"><strong>(</strong></font>var<font color="4444FF">,</font> other.instance_variable_get<font color="4444FF"><strong>(</strong></font>var<font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font> \
+                <strong>if</strong> var <font color="4444FF">!=</font> <font color="#008000">&quot;@saves&quot;</font>
+        <font color="4444FF"><strong>}</strong></font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> Example</strong></font></strong>
+    include Originator
+    attr_accessor <font color="4444FF">:</font>name<font color="4444FF">,</font> <font color="4444FF">:</font>color
+
+    <strong>def<font color="ff0000"> initialize</font></strong> name<font color="4444FF">,</font> color
+        <font color="#2040a0">@name</font> <font color="4444FF">=</font> name
+        <font color="#2040a0">@color</font> <font color="4444FF">=</font> color
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    ex <font color="4444FF">=</font> Example.new <font color="#008000">&quot;Matt&quot;</font><font color="4444FF">,</font> <font color="#008000">&quot;blue&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;my name is <font color="#2040a0">#{ex.name}</font>&quot;</font>
+    ex.save <font color="4444FF">:</font>now
+    ex.name <font color="4444FF">=</font> <font color="#008000">&quot;John&quot;</font>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;my name is <font color="#2040a0">#{ex.name}</font>&quot;</font>
+    ex.save <font color="4444FF">:</font>later
+
+    ex.restore <font color="4444FF">:</font>now
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;my name is <font color="#2040a0">#{ex.name}</font>&quot;</font>
+    ex.restore <font color="4444FF">:</font>later
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;my name is <font color="#2040a0">#{ex.name}</font>&quot;</font>
+<strong>end</strong>
+
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+my name is Matt
+saving key now
+my name is John
+saving key later
+restoring key now
+my name is Matt
+restoring key later
+my name is John
+</pre>

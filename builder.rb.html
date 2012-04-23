@@ -1,0 +1,68 @@
+<pre>
+<font color="#444444">#
+# The GoF Builder pattern
+# written by Matthieu Tanguay-Carel
+#
+# The Director class declares the creation process.
+# The Builder classes are the concrete builders.
+# The builders are free to implement a method or not, and can be
+# customised at will by the client.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><strong>class<font color="#2040a0"><strong> Director</strong></font></strong>
+    <strong>def<font color="ff0000"> initialize</font></strong>
+        <font color="#2040a0">@process</font> <font color="4444FF">=</font> <font color="4444FF"><strong>[</strong></font><font color="4444FF">:</font>create_header<font color="4444FF">,</font> <font color="4444FF">:</font>create_body<font color="4444FF">,</font> <font color="4444FF">:</font>create_footer<font color="4444FF"><strong>]</strong></font>
+    <strong>end</strong>
+    <strong>def<font color="ff0000"> build</font></strong> builder
+        <font color="#2040a0">@process.inject</font><font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;&quot;</font><font color="4444FF"><strong>)</strong></font> <font color="4444FF"><strong>{</strong></font>|acc<font color="4444FF">,</font> method|
+            acc <font color="4444FF">+=</font> builder.send method <strong>if</strong> builder.respond_to? method
+            acc
+        <font color="4444FF"><strong>}</strong></font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> HTMLBuilder</strong></font></strong>
+    <strong>def<font color="ff0000"> initialize</font></strong> title
+        <font color="#2040a0">@title</font> <font color="4444FF">=</font> title
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> create_header</font></strong>
+        <font color="#008000">&quot;&lt;html&gt;&lt;title&gt;<font color="#2040a0">#{@title}</font>&lt;/title&gt;&quot;</font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> create_body</font></strong>
+        <font color="#008000">&quot;&lt;body&gt;fig leave&lt;/body&gt;&quot;</font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> create_footer</font></strong>
+        <font color="#008000">&quot;&lt;/html&gt;&quot;</font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> XMLBuilder</strong></font></strong>
+    <strong>def<font color="ff0000"> create_header</font></strong>
+        <font color="#008000">&quot;&lt;?xml version='1.0' charset='utf-8'?&gt;&quot;</font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> create_body</font></strong>
+        <font color="#008000">&quot;&lt;root&gt;welcome&lt;/root&gt;&quot;</font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    director <font color="4444FF">=</font> Director.new
+    html_builder <font color="4444FF">=</font> HTMLBuilder.new <font color="#008000">'xml sucks'</font>
+    <font color="a52a2a"><strong>puts</strong></font> director.build<font color="4444FF"><strong>(</strong></font>html_builder<font color="4444FF"><strong>)</strong></font>
+
+    xml_builder <font color="4444FF">=</font> XMLBuilder.new
+    <font color="a52a2a"><strong>puts</strong></font> director.build<font color="4444FF"><strong>(</strong></font>xml_builder<font color="4444FF"><strong>)</strong></font>
+<strong>end</strong>
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+&lt;html&gt;&lt;title&gt;xml sucks&lt;/title&gt;&lt;body&gt;fig leave&lt;/body&gt;&lt;/html&gt;
+&lt;?xml version='1.0' charset='utf-8'?&gt;&lt;root&gt;welcome&lt;/root&gt;
+</pre>

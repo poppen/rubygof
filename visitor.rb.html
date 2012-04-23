@@ -1,0 +1,92 @@
+<pre>
+<font color="#444444">#
+# The GoF Visitor pattern
+# written by Matthieu Tanguay-Carel
+#
+# Depends on Rubytree (gem install rubytree).
+# The Node module contains the whole logic. A visitor can only implement
+# the callbacks it is interested in.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><font color="a52a2a"><strong>require</strong></font> <font color="#008000">'rubygems'</font>
+<font color="a52a2a"><strong>require</strong></font> <font color="#008000">'tree'</font>
+
+<strong>module</strong> Node
+    <strong>def<font color="ff0000"> accept</font></strong> visitor
+        <strong>if</strong> <strong>self</strong>.kind_of? StringNode
+            visitor.visit_string <strong>self</strong> <strong>if</strong> visitor.respond_to? <font color="4444FF">:</font>visit_string
+        <strong>elsif</strong> <strong>self</strong>.kind_of? IntegerNode
+            visitor.visit_int <strong>self</strong> <strong>if</strong> visitor.respond_to? <font color="4444FF">:</font>visit_int
+        <strong>end</strong>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> StringNode</strong></font></strong>
+    include Node
+    attr_accessor <font color="4444FF">:</font>string
+    <strong>def<font color="ff0000"> initialize</font></strong> val
+        <font color="#2040a0">@string</font> <font color="4444FF">=</font> val
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> IntegerNode</strong></font></strong>
+    include Node
+    attr_accessor <font color="4444FF">:</font>int
+    <strong>def<font color="ff0000"> initialize</font></strong> val
+        <font color="#2040a0">@int</font> <font color="4444FF">=</font> val
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> PrintingVisitor</strong></font></strong>
+    <strong>def<font color="ff0000"> visit_string</font></strong> node
+        <font color="a52a2a"><strong>puts</strong></font> node.string
+    <strong>end</strong>
+    <strong>def<font color="ff0000"> visit_int</font></strong> node
+        <font color="a52a2a"><strong>puts</strong></font> node.int
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> RevertingVisitor</strong></font></strong>
+    <strong>def<font color="ff0000"> visit_string</font></strong> node
+        <font color="a52a2a"><strong>puts</strong></font> node.string.reverse<font color="4444FF">!</font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    myTreeRoot <font color="4444FF">=</font> Tree<font color="4444FF">::</font>TreeNode.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;ROOT&quot;</font><font color="4444FF">,</font> StringNode.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;this is the root node&quot;</font><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font>
+    myTreeRoot <font color="4444FF">&lt;&lt;</font> Tree<font color="4444FF">::</font>TreeNode.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;child1&quot;</font><font color="4444FF">,</font> StringNode.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;madam im adam&quot;</font><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font> \
+        <font color="4444FF">&lt;&lt;</font> Tree<font color="4444FF">::</font>TreeNode.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;grandchild1&quot;</font><font color="4444FF">,</font> IntegerNode.new<font color="4444FF"><strong>(</strong></font><font color="#FF0000">3</font><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font> \
+        <font color="4444FF">&lt;&lt;</font> Tree<font color="4444FF">::</font>TreeNode.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;grandchild2&quot;</font><font color="4444FF">,</font> IntegerNode.new<font color="4444FF"><strong>(</strong></font><font color="#FF0000">2</font><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font>
+    myTreeRoot <font color="4444FF">&lt;&lt;</font> Tree<font color="4444FF">::</font>TreeNode.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;child2&quot;</font><font color="4444FF">,</font> StringNode.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;race car&quot;</font><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font> \
+        <font color="4444FF">&lt;&lt;</font> Tree<font color="4444FF">::</font>TreeNode.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;grandchild3&quot;</font><font color="4444FF">,</font> StringNode.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;damn, i agassi &quot;</font> <font color="4444FF">+</font> \
+            <font color="#008000">&quot;miss again. mad&quot;</font><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font>
+
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;PRINTING visitor...&quot;</font>
+    <font color="#2040a0">@pvisitor</font> <font color="4444FF">=</font> PrintingVisitor.new
+    myTreeRoot.each <font color="4444FF"><strong>{</strong></font> |node| node.content.accept <font color="#2040a0">@pvisitor</font> <font color="4444FF"><strong>}</strong></font>
+
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;<font color="#77dd77">\n</font>REVERTING visitor...&quot;</font>
+    <font color="#2040a0">@rvisitor</font> <font color="4444FF">=</font> RevertingVisitor.new
+    myTreeRoot.each <font color="4444FF"><strong>{</strong></font> |node| node.content.accept <font color="#2040a0">@rvisitor</font> <font color="4444FF"><strong>}</strong></font>
+<strong>end</strong>
+
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+PRINTING visitor...
+this is the root node
+madam im adam
+3
+2
+race car
+damn, i agassi miss again. mad
+
+REVERTING visitor...
+edon toor eht si siht
+mada mi madam
+rac ecar
+dam .niaga ssim issaga i ,nmad
+</pre>

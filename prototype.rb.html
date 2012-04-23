@@ -1,0 +1,79 @@
+<pre>
+<font color="#444444">#
+# The GoF Prototype pattern
+# written by Matthieu Tanguay-Carel
+#
+# The Note and Clef classes are the prototypes.
+# The deep copy used here will not work if the instances
+# have singleton methods (the ruby meaning of singleton).
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><strong>class<font color="#2040a0"><strong> PrototypeManager</strong></font></strong>
+    <strong>def<font color="ff0000"> initialize</font></strong>
+        <font color="#2040a0">@prototypes</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF"><strong>}</strong></font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> register</font></strong> key<font color="4444FF">,</font> prototype
+        <font color="a52a2a"><strong>raise</strong></font> IndexError<font color="4444FF">,</font> <font color="#008000">&quot;a prototype is already <font color="#77dd77">\
+</font>            assigned to this key: <font color="#2040a0">#{key}</font>&quot;</font> <strong>if</strong> <font color="#2040a0">@prototypes.include</font>? key
+        <font color="#2040a0">@prototypes</font><font color="4444FF"><strong>[</strong></font>key<font color="4444FF"><strong>]</strong></font> <font color="4444FF">=</font> prototype
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> unregister</font></strong> key
+        <font color="a52a2a"><strong>raise</strong></font> IndexError<font color="4444FF">,</font> <font color="#008000">&quot;this key is not <font color="#77dd77">\
+</font>            registered: <font color="#2040a0">#{key}</font>&quot;</font> <strong>if</strong> <font color="4444FF">!</font><font color="#2040a0">@prototypes.include</font>? key
+        <font color="#2040a0">@prototypes.delete</font> key
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> get</font></strong> key
+        <font color="#2040a0">@prototypes</font><font color="4444FF"><strong>[</strong></font>key<font color="4444FF"><strong>]</strong></font>.deep_copy
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> Object</strong></font></strong>
+    <strong>def<font color="ff0000"> deep_copy</font></strong> 
+        Marshal.<font color="a52a2a"><strong>load</strong></font><font color="4444FF"><strong>(</strong></font>Marshal.dump<font color="4444FF"><strong>(</strong></font><strong>self</strong><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font> 
+    <strong>end</strong> 
+<strong>end</strong> 
+
+<strong>class<font color="#2040a0"><strong> Note</strong></font></strong>
+    attr_accessor <font color="4444FF">:</font>duration
+    <strong>def<font color="ff0000"> initialize</font></strong> duration
+        <font color="#2040a0">@duration</font> <font color="4444FF">=</font> duration
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> Clef</strong></font></strong>
+    attr_accessor <font color="4444FF">:</font>type
+    <strong>def<font color="ff0000"> initialize</font></strong> type
+        <font color="#2040a0">@type</font> <font color="4444FF">=</font> type
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    manager <font color="4444FF">=</font> PrototypeManager.new
+    manager.register<font color="4444FF"><strong>(</strong></font><font color="4444FF">:</font>half_note<font color="4444FF">,</font> Note.new<font color="4444FF"><strong>(</strong></font><font color="#FF0000">2</font><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font>
+    manager.register<font color="4444FF"><strong>(</strong></font><font color="4444FF">:</font>full_note<font color="4444FF">,</font> Note.new<font color="4444FF"><strong>(</strong></font><font color="#FF0000">4</font><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font>
+    manager.register<font color="4444FF"><strong>(</strong></font><font color="4444FF">:</font>treble<font color="4444FF">,</font> Clef.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;high pitch&quot;</font><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font>
+    manager.register<font color="4444FF"><strong>(</strong></font><font color="4444FF">:</font>bass<font color="4444FF">,</font> Clef.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;low pitch&quot;</font><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>)</strong></font>
+    
+    clef <font color="4444FF">=</font> manager.get <font color="4444FF">:</font>bass
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;clef's type: <font color="#2040a0">#{clef.type}</font>&quot;</font>
+    note <font color="4444FF">=</font> manager.get <font color="4444FF">:</font>half_note
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;note's duration: <font color="#2040a0">#{note.duration}</font>&quot;</font>
+    note.duration <font color="4444FF">=</font> <font color="#FF0000">6</font>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;note's duration: <font color="#2040a0">#{note.duration}</font>&quot;</font>
+    other_note <font color="4444FF">=</font> manager.get <font color="4444FF">:</font>half_note
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;note's duration: <font color="#2040a0">#{other_note.duration}</font>&quot;</font>
+<strong>end</strong>
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+clef's type: low pitch
+note's duration: 2
+note's duration: 6
+note's duration: 2
+</pre>

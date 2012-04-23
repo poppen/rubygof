@@ -1,0 +1,149 @@
+<pre>
+<font color="#444444">#
+# The GoF State pattern
+#
+#   Here is Maurice Codik's implementation.
+#   I only added an &quot;if __FILE__ == $0&quot;, tweaked the layout, and fixed
+#   a typo.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# Copyright (C) 2006 Maurice Codik - maurice.codik@gmail.com
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the &quot;Software&quot;),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
+# 
+# Each call to state defines a new subclass of Connection that is stored
+# in a hash.  Then, a call to transition_to instantiates one of these
+# subclasses and sets it to the be the active state.  Method calls to
+# Connection are delegated to the active state object via method_missing.
+
+</font><strong>module</strong> StatePattern
+  <strong>class<font color="#2040a0"><strong> UnknownStateException</strong></font> <font color="0000ff"><strong><font color="4444FF">&lt;</font> Exception</strong></font></strong>
+  <strong>end</strong>
+  
+  <strong>def<font color="ff0000"> StatePattern</font>.included<font color="2040a0"><font color="4444FF">(</font>mod<font color="4444FF">)</font></font></strong>
+    mod.extend StatePattern<font color="4444FF">::</font>ClassMethods
+  <strong>end</strong>
+  
+  <strong>module</strong> ClassMethods
+    attr_reader <font color="4444FF">:</font>state_classes
+    <strong>def<font color="ff0000"> state</font><font color="2040a0"><font color="4444FF">(</font>state_name, &amp;block<font color="4444FF">)</font></font></strong>
+      <font color="#2040a0">@state_classes</font> ||<font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF"><strong>}</strong></font>
+      
+      new_klass <font color="4444FF">=</font> Class.new<font color="4444FF"><strong>(</strong></font><strong>self</strong><font color="4444FF">,</font> &amp;block<font color="4444FF"><strong>)</strong></font>
+      new_klass.class_eval <strong>do</strong>
+        alias_method <font color="4444FF">:</font>__old_init<font color="4444FF">,</font> <font color="4444FF">:</font>initialize
+        <strong>def<font color="ff0000"> initialize</font><font color="2040a0"><font color="4444FF">(</font>context, *args, &amp;block<font color="4444FF">)</font></font></strong>
+          <font color="#2040a0">@context</font> <font color="4444FF">=</font> context
+          __old_init<font color="4444FF"><strong>(</strong></font><font color="4444FF">*</font>args<font color="4444FF">,</font> &amp;block<font color="4444FF"><strong>)</strong></font>
+        <strong>end</strong>
+      <strong>end</strong>
+      
+      <font color="#2040a0">@state_classes</font><font color="4444FF"><strong>[</strong></font>state_name<font color="4444FF"><strong>]</strong></font> <font color="4444FF">=</font> new_klass
+    <strong>end</strong>
+  <strong>end</strong>
+  
+  attr_accessor <font color="4444FF">:</font>current_state<font color="4444FF">,</font> <font color="4444FF">:</font>current_state_obj
+  
+  <strong>def<font color="ff0000"> transition_to</font><font color="2040a0"><font color="4444FF">(</font>state_name, *args, &amp;block<font color="4444FF">)</font></font></strong>
+    new_context <font color="4444FF">=</font> <font color="#2040a0">@context</font> || <strong>self</strong>
+    
+    klass <font color="4444FF">=</font> new_context.<strong>class</strong>.state_classes<font color="4444FF"><strong>[</strong></font>state_name<font color="4444FF"><strong>]</strong></font>
+    <strong>if</strong> klass
+      new_context.current_state <font color="4444FF">=</font> state_name
+      new_context.current_state_obj <font color="4444FF">=</font> klass.new<font color="4444FF"><strong>(</strong></font>new_context<font color="4444FF">,</font> <font color="4444FF">*</font>args<font color="4444FF">,</font> &amp;block<font color="4444FF"><strong>)</strong></font>
+    <strong>else</strong>
+      <font color="a52a2a"><strong>raise</strong></font> UnknownStateException<font color="4444FF">,</font> <font color="#008000">&quot;tried to transition to &quot;</font> <font color="4444FF">+</font> \
+        <font color="#008000">&quot;unknown state, <font color="#2040a0">#{state_name}</font>&quot;</font>      
+    <strong>end</strong>
+  <strong>end</strong>
+  
+  <strong>def<font color="ff0000"> method_missing</font><font color="2040a0"><font color="4444FF">(</font>method, *args, &amp;block<font color="4444FF">)</font></font></strong>
+    <strong>unless</strong> <font color="#2040a0">@current_state_obj</font>
+      transition_to <font color="4444FF">:</font>initial
+    <strong>end</strong>
+    <strong>if</strong> <font color="#2040a0">@current_state_obj</font>
+      <font color="#2040a0">@current_state_obj.send</font><font color="4444FF"><strong>(</strong></font>method<font color="4444FF">,</font> <font color="4444FF">*</font>args<font color="4444FF">,</font> &amp;block<font color="4444FF"><strong>)</strong></font>
+    <strong>else</strong>
+      <strong>super</strong>
+    <strong>end</strong>
+  <strong>end</strong>
+  
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> Connection</strong></font></strong>
+  include StatePattern
+  state <font color="4444FF">:</font>initial <strong>do</strong> <font color="#444444"># you always need a state named initial
+    </font><strong>def<font color="ff0000"> connect</font></strong>
+      <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;connected&quot;</font>
+      <font color="#444444"># move to state :connected. all other args to transition_to 
+      # are passed to the new state's constructor
+      </font>transition_to <font color="4444FF">:</font>connected<font color="4444FF">,</font> <font color="#008000">&quot;hello from initial state&quot;</font> 
+    <strong>end</strong>
+    <strong>def<font color="ff0000"> disconnect</font></strong>
+      <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;not connected yet&quot;</font>
+    <strong>end</strong>
+  <strong>end</strong>
+  state <font color="4444FF">:</font>connected <strong>do</strong>
+    <strong>def<font color="ff0000"> initialize</font><font color="2040a0"><font color="4444FF">(</font>msg<font color="4444FF">)</font></font></strong>
+      <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;initialize got msg: <font color="#2040a0">#{msg}</font>&quot;</font>
+    <strong>end</strong>
+    <strong>def<font color="ff0000"> connect</font></strong>
+      <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;already connected&quot;</font>
+    <strong>end</strong>
+    <strong>def<font color="ff0000"> disconnect</font></strong>
+      <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;disconnecting&quot;</font>
+      transition_to <font color="4444FF">:</font>initial
+    <strong>end</strong>
+  <strong>end</strong>
+  <strong>def<font color="ff0000"> reset</font></strong>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;resetting outside a state&quot;</font>
+    <font color="#444444"># you can also change the state from outside of the state objects
+    </font>transition_to <font color="4444FF">:</font>initial
+  <strong>end</strong>
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    c <font color="4444FF">=</font> Connection.new
+    c.disconnect <font color="#444444"># not connected yet
+    </font>c.connect    <font color="#444444"># connected
+                 # initialize got msg: hello from initial state
+    </font>c.connect    <font color="#444444"># already connected
+    </font>c.disconnect <font color="#444444"># disconnecting
+    </font>c.connect    <font color="#444444"># connected
+                 # initialize got msg: hello from initial state
+    </font>c.reset      <font color="#444444"># reseting outside a state
+    </font>c.disconnect <font color="#444444"># not connected yet
+</font><strong>end</strong>
+
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+not connected yet
+connected
+initialize got msg: hello from initial state
+already connected
+disconnecting
+connected
+initialize got msg: hello from initial state
+resetting outside a state
+not connected yet
+</pre>

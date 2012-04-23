@@ -1,0 +1,61 @@
+<pre>
+<font color="#444444">#
+# The GoF Adapter pattern
+# written by Matthieu Tanguay-Carel
+#
+# The Adapter offers exactly the same interface as the adaptee, but it can
+# override any method or add new ones.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><strong>class<font color="#2040a0"><strong> Adaptee</strong></font></strong>
+    <strong>def<font color="ff0000"> talk</font></strong>
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;I'm Adaptee&quot;</font>
+    <strong>end</strong>
+    <strong>def<font color="ff0000"> whine</font></strong>
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;Stop bullying me!&quot;</font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> Adapter</strong></font></strong>
+    <strong>def<font color="ff0000"> initialize</font></strong>
+        <font color="#2040a0">@adaptee</font> <font color="4444FF">=</font> Adaptee.new
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> talk</font></strong> <font color="#444444">#override
+        </font><font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;Let me introduce you to Adaptee!&quot;</font>
+        <font color="#2040a0">@adaptee.talk</font>
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;That was my adaptee&quot;</font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> do_other_stuff</font></strong>
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;I'm versatile&quot;</font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> method_missing</font></strong> method
+        <strong>if</strong> <font color="#2040a0">@adaptee.respond_to</font>? method
+            <font color="#2040a0">@adaptee.send</font> method
+        <strong>else</strong>
+            <font color="a52a2a"><strong>raise</strong></font> NotImplementedError<font color="4444FF">,</font> <font color="#008000">&quot;This method is not &quot;</font> <font color="4444FF">+</font> \
+                <font color="#008000">&quot;available on this interface&quot;</font>
+        <strong>end</strong>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    adapter <font color="4444FF">=</font> Adapter.new
+    adapter.talk
+    adapter.whine
+    adapter.do_other_stuff
+<strong>end</strong>
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+Let me introduce you to Adaptee!
+I'm Adaptee
+That was my adaptee
+Stop bullying me!
+I'm versatile
+</pre>

@@ -1,0 +1,85 @@
+<pre>
+<font color="#444444">#
+# The GoF Flyweight pattern
+# written by Matthieu Tanguay-Carel
+#
+# The Glyph instances are the flyweights.
+# Each glyph knows how to draw itself, given the context.
+# You can supply a block to Glyp#draw to draw something else than
+# the glyph itself.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><strong>class<font color="#2040a0"><strong> Glyph</strong></font></strong>
+    attr_accessor <font color="4444FF">:</font>char
+    <strong>def<font color="ff0000"> initialize</font></strong> char
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;initializing with <font color="#2040a0">#{char}</font>&quot;</font>
+        <font color="#2040a0">@char</font> <font color="4444FF">=</font> char
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> draw</font></strong> context <font color="#444444">#hash expecting :color and :size and :x and :y as keys
+        </font>inner_html <font color="4444FF">=</font> block_given?? <strong>yield</strong><font color="4444FF"><strong>(</strong></font><font color="#2040a0">@char</font><font color="4444FF"><strong>)</strong></font> <font color="4444FF">:</font> <font color="#2040a0">@char</font>
+        <font color="#008000">&quot;&lt;span style='color:<font color="#2040a0">#{context[:color]}</font>; font-size:<font color="#2040a0">#{context[:size]}</font>;<font color="#77dd77">\
+</font>        position:absolute; top: <font color="#2040a0">#{context[:y]}</font>px; &quot;</font> <font color="4444FF">+</font> \
+        <font color="#008000">&quot; left: <font color="#2040a0">#{context[:x]}</font>px'&gt;<font color="#2040a0">#{inner_html}</font>&lt;/span&gt;&quot;</font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> FlyweightFactory</strong></font></strong>
+    <strong>def<font color="ff0000"> initialize</font></strong>
+        <font color="#2040a0">@flyweights</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF"><strong>}</strong></font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> get</font></strong> charsym
+        <strong>return</strong> <font color="#2040a0">@flyweights</font><font color="4444FF"><strong>[</strong></font>charsym<font color="4444FF"><strong>]</strong></font> <strong>if</strong> <font color="#2040a0">@flyweights.include</font>? charsym
+        <font color="#2040a0">@flyweights</font><font color="4444FF"><strong>[</strong></font>charsym<font color="4444FF"><strong>]</strong></font> <font color="4444FF">=</font> Glyph.new charsym
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    <font color="#444444">#a few tests
+    </font>factory <font color="4444FF">=</font> FlyweightFactory.new
+    a <font color="4444FF">=</font> factory.get <font color="4444FF">:</font>a
+    a<font color="#FF0000">2</font> <font color="4444FF">=</font> factory.get <font color="4444FF">:</font>a
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;Flyweights are the same object: <font color="#2040a0">#{a.eql?(a2)}</font>&quot;</font>
+    b <font color="4444FF">=</font> factory.get <font color="4444FF">:</font>b
+    b<font color="#FF0000">2</font> <font color="4444FF">=</font> factory.get <font color="4444FF">:</font>b
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;Flyweights are the same object: <font color="#2040a0">#{b.eql?(b2)}</font>&quot;</font>
+
+    <font color="#444444">#draw a rectangle containing letters in random contexts
+    </font>File.<font color="a52a2a"><strong>open</strong></font><font color="4444FF"><strong>(</strong></font><font color="#008000">'test.html'</font><font color="4444FF">,</font><font color="#008000">'w'</font><font color="4444FF"><strong>)</strong></font> <font color="4444FF"><strong>{</strong></font>|file|
+        file.write <font color="#008000">&quot;&lt;div style='width:800px; height:600px; &quot;</font> <font color="4444FF">+</font> \
+            <font color="#008000">&quot;border:1px #ccc solid; background-color:#efefff;'&quot;</font>
+        colors <font color="4444FF">=</font> <font color="4444FF"><strong>[</strong></font><font color="#008000">'red'</font><font color="4444FF">,</font> <font color="#008000">'blue'</font><font color="4444FF">,</font> <font color="#008000">'grey'</font><font color="4444FF"><strong>]</strong></font>
+        sizes <font color="4444FF">=</font> <font color="4444FF"><strong>[</strong></font><font color="#008000">'24pt'</font><font color="4444FF">,</font> <font color="#008000">'8pt'</font><font color="4444FF">,</font> <font color="#008000">'14pt'</font><font color="4444FF"><strong>]</strong></font>
+        context <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF"><strong>}</strong></font>
+        syms <font color="4444FF">=</font> <font color="4444FF"><strong>[</strong></font><font color="4444FF">:</font>a<font color="4444FF">,</font> <font color="4444FF">:</font>b<font color="4444FF">,</font> <font color="4444FF">:</font>b<font color="4444FF">,</font> <font color="4444FF">:</font>b<font color="4444FF">,</font> <font color="4444FF">:</font>c<font color="4444FF">,</font> <font color="4444FF">:</font>d<font color="4444FF">,</font> <font color="4444FF">:</font>e<font color="4444FF">,</font> <font color="4444FF">:</font>e<font color="4444FF">,</font> <font color="4444FF">:</font>f<font color="4444FF">,</font> <font color="4444FF">:</font>d<font color="4444FF">,</font> <font color="4444FF">:</font>e<font color="4444FF">,</font> <font color="4444FF">:</font>e<font color="4444FF">,</font> <font color="4444FF">:</font>f<font color="4444FF"><strong>]</strong></font>
+        syms.each <font color="4444FF"><strong>{</strong></font>|s|
+            index <font color="4444FF">=</font> <font color="a52a2a"><strong>rand</strong></font> <font color="#FF0000">3</font>
+            index<font color="#FF0000">2</font> <font color="4444FF">=</font> <font color="a52a2a"><strong>rand</strong></font> <font color="#FF0000">3</font>
+            x <font color="4444FF">=</font> <font color="a52a2a"><strong>rand</strong></font> <font color="#FF0000">800</font>
+            y <font color="4444FF">=</font> <font color="a52a2a"><strong>rand</strong></font> <font color="#FF0000">600</font>
+            context<font color="4444FF"><strong>[</strong></font><font color="4444FF">:</font>color<font color="4444FF"><strong>]</strong></font> <font color="4444FF">=</font> colors<font color="4444FF"><strong>[</strong></font>index<font color="4444FF"><strong>]</strong></font>
+            context<font color="4444FF"><strong>[</strong></font><font color="4444FF">:</font>size<font color="4444FF"><strong>]</strong></font> <font color="4444FF">=</font> sizes<font color="4444FF"><strong>[</strong></font>index<font color="#FF0000">2</font><font color="4444FF"><strong>]</strong></font>
+            context<font color="4444FF"><strong>[</strong></font><font color="4444FF">:</font>x<font color="4444FF"><strong>]</strong></font> <font color="4444FF">=</font> x
+            context<font color="4444FF"><strong>[</strong></font><font color="4444FF">:</font>y<font color="4444FF"><strong>]</strong></font> <font color="4444FF">=</font> y
+            file.write factory.get<font color="4444FF"><strong>(</strong></font>s<font color="4444FF"><strong>)</strong></font>.draw<font color="4444FF"><strong>(</strong></font>context<font color="4444FF"><strong>)</strong></font> <font color="4444FF"><strong>{</strong></font>|char|
+                <font color="#008000">&quot;<font color="#2040a0">#{char}</font>?!&quot;</font>
+            <font color="4444FF"><strong>}</strong></font>
+        <font color="4444FF"><strong>}</strong></font>
+    <font color="4444FF"><strong>}</strong></font>
+<strong>end</strong>
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+initializing with a
+Flyweights are the same object: true
+initializing with b
+Flyweights are the same object: true
+initializing with c
+initializing with d
+initializing with e
+initializing with f
+</pre>

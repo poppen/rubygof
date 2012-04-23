@@ -1,0 +1,132 @@
+<pre>
+<font color="#444444">#
+# The GoF Chain of Responsibility pattern
+# written by Matthieu Tanguay-Carel
+#
+# Each handler needs to be added to a chain and needs to be given
+# an operation.
+# The handler's operation is a block that should return false if the request
+# should be sent forward.
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+</font><strong>class<font color="#2040a0"><strong> Array</strong></font></strong>
+    <strong>def<font color="ff0000"> element_after</font></strong> item
+        inject<font color="4444FF"><strong>(</strong></font><strong>false</strong><font color="4444FF"><strong>)</strong></font><font color="4444FF"><strong>{</strong></font>|acc<font color="4444FF">,</font> elem|
+            <strong>return</strong> elem <strong>if</strong> acc
+            elem <font color="4444FF">==</font> item ? <strong>true</strong> <font color="4444FF">:</font> <strong>false</strong>
+        <font color="4444FF"><strong>}</strong></font>
+        <strong>nil</strong>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>class<font color="#2040a0"><strong> Chain</strong></font></strong>
+    <strong>def<font color="ff0000"> initialize</font></strong>
+        <font color="#2040a0">@chain</font> <font color="4444FF">=</font> <font color="4444FF"><strong>[</strong></font><font color="4444FF"><strong>]</strong></font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> add_handler</font></strong> <font color="4444FF">*</font>handlers
+        handlers.reverse.each <font color="4444FF"><strong>{</strong></font>|h|
+            <font color="#2040a0">@chain</font> <font color="4444FF">&lt;&lt;</font> h
+            h.chain <font color="4444FF">=</font> <strong>self</strong>
+        <font color="4444FF"><strong>}</strong></font>
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> forward</font></strong> <font color="a52a2a"><strong>caller</strong></font><font color="4444FF">,</font> request
+        next_soul <font color="4444FF">=</font> <font color="#2040a0">@chain.element_after</font> <font color="a52a2a"><strong>caller</strong></font>
+        <font color="a52a2a"><strong>raise</strong></font> Exception.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;End of chain: caller has no forward &quot;</font> <font color="4444FF">+</font> \
+            <font color="#008000">&quot;neighbor available in this chain&quot;</font><font color="4444FF"><strong>)</strong></font> <strong>if</strong> next_soul.<strong>nil</strong>?
+        next_soul.handle request
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>module</strong> Handler
+    attr_accessor <font color="4444FF">:</font>chain
+    <strong>def<font color="ff0000"> handle</font></strong> request
+        <font color="a52a2a"><strong>raise</strong></font> Exception.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;Handler without a chain&quot;</font><font color="4444FF"><strong>)</strong></font> <strong>if</strong> <font color="#2040a0">@chain.nil</font>?
+        <font color="a52a2a"><strong>raise</strong></font> Exception.new<font color="4444FF"><strong>(</strong></font><font color="#008000">&quot;Handler without an operation&quot;</font><font color="4444FF"><strong>)</strong></font> <strong>if</strong> <font color="#2040a0">@operation.nil</font>?
+        chain.forward <strong>self</strong><font color="4444FF">,</font> request <strong>if</strong> <font color="4444FF">!</font><font color="#2040a0">@operation.call</font> request
+    <strong>end</strong>
+
+    <strong>def<font color="ff0000"> operation</font></strong> &amp;block
+        <font color="#2040a0">@operation</font> <font color="4444FF">=</font> block
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>def<font color="ff0000"> protect</font></strong>
+    <strong>begin</strong>
+        <strong>yield</strong>
+    <strong>rescue</strong> Exception
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#2040a0"><strong>$!</strong></font>
+    <strong>end</strong>
+<strong>end</strong>
+
+<strong>if</strong> __FILE__ <font color="4444FF">==</font> <font color="#2040a0"><strong>$0</strong></font>
+    <font color="#2040a0">@chain</font> <font color="4444FF">=</font> Chain.new
+
+    <font color="#444444">#create some handlers and add them to chain
+    </font>default_handler <font color="4444FF">=</font> Object.new
+    default_handler.extend Handler
+    default_handler.operation <font color="4444FF"><strong>{</strong></font>|request|
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;Default handler: the chain of responsibility could not handle&quot;</font> <font color="4444FF">+</font> \
+            <font color="#008000">&quot; the request: <font color="#2040a0">#{request}</font>&quot;</font>
+    <font color="4444FF"><strong>}</strong></font>
+    
+    coward <font color="4444FF">=</font> Object.new
+    coward.extend Handler
+    coward.operation <font color="4444FF"><strong>{</strong></font>|request|
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;I'm not getting my hands dirty. Let's forward.&quot;</font>
+        <strong>false</strong>
+    <font color="4444FF"><strong>}</strong></font>
+
+    hard_worker <font color="4444FF">=</font> Object.new
+    hard_worker.extend Handler
+    hard_worker.operation <font color="4444FF"><strong>{</strong></font>|request|
+        <strong>if</strong> request.respond_to? <font color="4444FF">:</font>include? <strong>and</strong> request.include? <font color="#008000">&quot;work&quot;</font>
+            <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;Request handled!&quot;</font>
+            <strong>true</strong>
+        <strong>else</strong>
+            <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;Could not handle request... forwarding.&quot;</font>
+            <strong>false</strong>
+        <strong>end</strong>
+    <font color="4444FF"><strong>}</strong></font>
+    
+    <font color="#2040a0">@chain.add_handler</font> default_handler<font color="4444FF">,</font> hard_worker<font color="4444FF">,</font> coward
+
+    <font color="#444444">#tests
+    </font>protect <font color="4444FF"><strong>{</strong></font>
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;<font color="#77dd77">\n</font>Sending first test request&quot;</font>
+        coward.handle <font color="#008000">&quot;test&quot;</font>
+    <font color="4444FF"><strong>}</strong></font>
+    protect <font color="4444FF"><strong>{</strong></font> 
+        <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;<font color="#77dd77">\n</font>Sending work request&quot;</font>
+        coward.handle <font color="#008000">&quot;work&quot;</font>
+    <font color="4444FF"><strong>}</strong></font>
+    <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;<font color="#77dd77">\n</font>Making it fail&quot;</font>
+    foreigner <font color="4444FF">=</font> Object.new
+    foreigner.extend Handler
+    protect <font color="4444FF"><strong>{</strong></font> foreigner.handle <font color="#008000">&quot;me&quot;</font> <font color="4444FF"><strong>}</strong></font>
+    foreigner.operation <font color="4444FF"><strong>{</strong></font>|request| <font color="a52a2a"><strong>puts</strong></font> <font color="#008000">&quot;Guten Tag&quot;</font><font color="4444FF"><strong>}</strong></font>
+    protect <font color="4444FF"><strong>{</strong></font> <font color="#2040a0">@chain.forward</font> foreigner<font color="4444FF">,</font> <font color="#008000">&quot;hehe&quot;</font> <font color="4444FF"><strong>}</strong></font>
+<strong>end</strong>
+
+
+<br/>
+<strong>Output</strong>
+<strong>------</strong>
+<br/>
+
+Sending first test request
+I'm not getting my hands dirty. Let's forward.
+Could not handle request... forwarding.
+Default handler: the chain of responsibility could not handle the request: test
+End of chain: caller has no forward neighbor available in this chain
+
+Sending work request
+I'm not getting my hands dirty. Let's forward.
+Request handled!
+
+Making it fail
+Handler without a chain
+End of chain: caller has no forward neighbor available in this chain
+</pre>

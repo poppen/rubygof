@@ -3,7 +3,7 @@
 # written by Matthieu Tanguay-Carel
 #
 # Factories behave in effect like singletons.
-# Extra functionality can be tested for with "Object#respond_to? :extra" 
+# Extra functionality can be tested for with "Object#respond_to? :extra"
 # if needed (See GTKFactory).
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -44,7 +44,7 @@ end
 
 class LookAndFeelManager
 
-    @@types2classes = { 
+    @@types2classes = {
         :motif => [MotifFactory,nil],
         :gtk   => [GTKFactory,nil],
         :win95 => [Win95Factory,nil]
@@ -67,7 +67,7 @@ class LookAndFeelManager
 end
 
 if __FILE__ == $0
-    factory = LookAndFeelManager.create :gtk
+    factory = LookAndFeelManager.create [:gtk, :motif, :win95].sample
     puts factory.create_button
     factory.extra if factory.respond_to? :extra
 end
